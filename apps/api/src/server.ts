@@ -1,6 +1,7 @@
 import { app } from "./app.js";
 import { env } from "./config/env.js";
 import { disconnectPrisma, isDatabaseConfigured } from "./lib/prisma.js";
+import { isSupabaseConfigured } from "./lib/supabase.js";
 
 const server = app.listen(env.API_PORT, () => {
   console.log("==================================================");
@@ -10,8 +11,15 @@ const server = app.listen(env.API_PORT, () => {
   console.log(
     `🗄️ Database status: ${
       isDatabaseConfigured
-        ? "PostgreSQL connection string provided"
+        ? "Configured (PostgreSQL URL set)"
         : "Standby (DATABASE_URL not configured)"
+    }`
+  );
+  console.log(
+    `⚡ Supabase status: ${
+      isSupabaseConfigured
+        ? "Configured (SUPABASE_URL set)"
+        : "Standby (SUPABASE_URL not configured)"
     }`
   );
   console.log("==================================================");

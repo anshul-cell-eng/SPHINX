@@ -266,8 +266,17 @@ export function OverviewPage() {
             <CardHeader className="p-4 pb-2">
               <div className="flex items-center justify-between">
                 <Database className="h-4 w-4 text-amber-400" />
-                <Badge variant="secondary" className="text-[10px] font-mono">
-                  Ready for DB
+                <Badge
+                  variant={
+                    healthData?.services?.database === "connected"
+                      ? "success"
+                      : "warning"
+                  }
+                  className="text-[10px] font-mono"
+                >
+                  {healthData?.services?.database === "connected"
+                    ? "Connected"
+                    : "Standby (No DB URL)"}
                 </Badge>
               </div>
               <CardTitle className="text-sm font-semibold mt-2">
@@ -283,15 +292,24 @@ export function OverviewPage() {
             <CardHeader className="p-4 pb-2">
               <div className="flex items-center justify-between">
                 <ShieldCheck className="h-4 w-4 text-primary" />
-                <Badge variant="outline" className="text-[10px] font-mono">
-                  Sprint 02
+                <Badge
+                  variant={
+                    healthData?.services?.supabase === "connected"
+                      ? "success"
+                      : "secondary"
+                  }
+                  className="text-[10px] font-mono"
+                >
+                  {healthData?.services?.supabase === "connected"
+                    ? "Connected"
+                    : "Standby (No Supabase URL)"}
                 </Badge>
               </div>
               <CardTitle className="text-sm font-semibold mt-2">
                 Supabase Auth & RBAC
               </CardTitle>
               <CardDescription className="text-xs">
-                Architecture ready for Supabase JWT verification and tenant-scoped role-based access control.
+                @supabase/supabase-js initialized in API. Ready for Supabase Auth JWT verification in Sprint 02.
               </CardDescription>
             </CardHeader>
           </Card>

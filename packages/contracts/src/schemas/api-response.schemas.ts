@@ -57,7 +57,8 @@ export const healthStatusDataSchema = z.object({
   timestamp: z.string().optional(),
   services: z
     .object({
-      database: z.enum(["connected", "disconnected", "unconfigured", "error"]).optional(),
+      database: z.enum(["connected", "disconnected", "unconfigured", "error"]).or(z.string()).optional(),
+      supabase: z.enum(["connected", "disconnected", "unconfigured", "error"]).or(z.string()).optional(),
     })
     .optional(),
 });
