@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "../lib/api-client";
-import type { HealthStatusData, ApiResponse } from "@nexus/contracts";
+import type { HealthStatusData, ApiResponse } from "../types/contracts";
 
 export type ConnectionStatus = "connected" | "disconnected" | "checking";
 

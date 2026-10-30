@@ -1,42 +1,20 @@
 import dotenv from "dotenv";
 import { z } from "zod";
 
-// Load environment variables from process.env or .env file
+// Load environment variables
 dotenv.config();
 
 const envSchema = z.object({
-  NODE_ENV: z
-    .enum(["development", "test", "production"])
-    .default("development"),
-  API_PORT: z.coerce
-    .number()
-    .int()
-    .positive()
-    .default(4000),
-  WEB_URL: z
-    .string()
-    .min(1)
-    .default("http://localhost:5173"),
-  DATABASE_URL: z
-    .string()
-    .transform((val) => (val.trim() === "" ? undefined : val))
-    .pipe(z.string().min(1).optional()),
-  DIRECT_URL: z
-    .string()
-    .transform((val) => (val.trim() === "" ? undefined : val))
-    .pipe(z.string().min(1).optional()),
-  SUPABASE_URL: z
-    .string()
-    .transform((val) => (val.trim() === "" ? undefined : val))
-    .pipe(z.string().url("SUPABASE_URL must be a valid URL").optional()),
-  SUPABASE_ANON_KEY: z
-    .string()
-    .transform((val) => (val.trim() === "" ? undefined : val))
-    .pipe(z.string().min(1).optional()),
-  SUPABASE_SERVICE_ROLE_KEY: z
-    .string()
-    .transform((val) => (val.trim() === "" ? undefined : val))
-    .pipe(z.string().min(1).optional()),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  PORT: z.coerce.number().int().positive().optional(),
+  API_PORT: z.coerce.number().int().positive().default(4000),
+  WEB_URL: z.string().default("http://localhost:5173"),
+  MONGODB_URI: z.string().default("mongodb://127.0.0.1:27017/freelanceos"),
+  JWT_ACCESS_SECRET: z.string().default("freelanceos_jwt_access_super_secret_key_2026_dev"),
+  JWT_REFRESH_SECRET: z.string().default("freelanceos_jwt_refresh_super_secret_key_2026_dev"),
+  RAZORPAY_KEY_ID: z.string().default("rzp_test_9kM38Lp0QxWv12"),
+  RAZORPAY_KEY_SECRET: z.string().default("sec_test_7f920da8e14b"),
+  RAZORPAY_WEBHOOK_SECRET: z.string().default("whsec_test_99a8b7c6d5e4"),
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -52,15 +30,8 @@ function validateEnv(): Env {
     process.exit(1);
   }
 
-  // Safety check: warn if sensitive keys are missing in production
-  if (result.data.NODE_ENV === "production") {
-    if (!result.data.DATABASE_URL) {
-      console.error("❌ Critical: DATABASE_URL must be defined in production.");
-      process.exit(1);
-    }
-  }
-
   return result.data;
 }
 
 export const env = validateEnv();
+export const effectivePort = env.PORT || env.API_PORT;

@@ -1,8 +1,19 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AppLayout } from "./layouts/AppLayout";
-import { OverviewPage } from "./pages/OverviewPage";
-import { PlaceholderPage } from "./pages/PlaceholderPage";
+import { LandingPage } from "./pages/LandingPage";
+import { LoginPage } from "./pages/LoginPage";
+import { DashboardLayout } from "./layouts/DashboardLayout";
+import { DashboardOverview } from "./pages/DashboardOverview";
+import { ClientsPage } from "./pages/ClientsPage";
+import { ProjectsPage } from "./pages/ProjectsPage";
+import { ProposalsPage } from "./pages/ProposalsPage";
+import { ContractsPage } from "./pages/ContractsPage";
+import { InvoicesPage } from "./pages/InvoicesPage";
+import { PaymentsPage } from "./pages/PaymentsPage";
+import { TimeTrackingPage } from "./pages/TimeTrackingPage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { SettingsPage } from "./pages/SettingsPage";
+import { ClientPortalPage } from "./pages/ClientPortalPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,87 +29,31 @@ export function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route element={<AppLayout />}>
-            <Route index element={<OverviewPage />} />
-            <Route
-              path="incidents"
-              element={
-                <PlaceholderPage
-                  title="Incident Management"
-                  description="Monitor, triage, and resolve enterprise outages, incidents, and operational alerts."
-                  moduleCode="MOD-INC"
-                  targetSprint="Sprint 02"
-                />
-              }
-            />
-            <Route
-              path="workforce"
-              element={
-                <PlaceholderPage
-                  title="Workforce & Responders"
-                  description="Manage on-call responders, shifts, departments, and personnel operational allocations."
-                  moduleCode="MOD-WRK"
-                  targetSprint="Sprint 03"
-                />
-              }
-            />
-            <Route
-              path="assets"
-              element={
-                <PlaceholderPage
-                  title="Asset & Infrastructure Inventory"
-                  description="Track enterprise hardware, cloud instances, network switches, and critical infrastructure."
-                  moduleCode="MOD-AST"
-                  targetSprint="Sprint 03"
-                />
-              }
-            />
-            <Route
-              path="departments"
-              element={
-                <PlaceholderPage
-                  title="Departments & Teams"
-                  description="Configure multi-tenant organizational structure, operational units, and department codes."
-                  moduleCode="MOD-DEP"
-                  targetSprint="Sprint 03"
-                />
-              }
-            />
-            <Route
-              path="locations"
-              element={
-                <PlaceholderPage
-                  title="Locations & Sites"
-                  description="Manage physical data centers, office branches, and operational sites."
-                  moduleCode="MOD-LOC"
-                  targetSprint="Sprint 04"
-                />
-              }
-            />
-            <Route
-              path="analytics"
-              element={
-                <PlaceholderPage
-                  title="Analytics & SLA Reporting"
-                  description="Operational velocity metrics, MTTR, MTTD, and SLA breach risk analytics."
-                  moduleCode="MOD-ANL"
-                  targetSprint="Sprint 04"
-                />
-              }
-            />
-            <Route
-              path="settings"
-              element={
-                <PlaceholderPage
-                  title="Settings & System Configuration"
-                  description="Tenant configurations, API webhooks, Supabase auth parameters, and audit controls."
-                  moduleCode="MOD-SET"
-                  targetSprint="Sprint 05"
-                />
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
+          {/* Public Landing Page */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Authentication */}
+          <Route path="/auth/login" element={<LoginPage />} />
+
+          {/* Client Portal Mode */}
+          <Route path="/portal" element={<ClientPortalPage />} />
+
+          {/* Freelancer SaaS Dashboard */}
+          <Route path="/app" element={<DashboardLayout />}>
+            <Route index element={<DashboardOverview />} />
+            <Route path="clients" element={<ClientsPage />} />
+            <Route path="projects" element={<ProjectsPage />} />
+            <Route path="proposals" element={<ProposalsPage />} />
+            <Route path="contracts" element={<ContractsPage />} />
+            <Route path="invoices" element={<InvoicesPage />} />
+            <Route path="payments" element={<PaymentsPage />} />
+            <Route path="time-tracking" element={<TimeTrackingPage />} />
+            <Route path="analytics" element={<AnalyticsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>

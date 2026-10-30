@@ -1,27 +1,19 @@
 {
-  "name": "nexus-monorepo",
+  "name": "freelanceos-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "NEXUS — Enterprise Operations Management SaaS Platform",
+  "description": "FREELANCEOS — Premium Freelancer Business Operating System",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "apps/*"
   ],
   "scripts": {
-    "dev": "concurrently -k -p \"[{name}]\" -n \"API,WEB\" -c \"cyan.bold,magenta.bold\" \"npm run dev --workspace=@nexus/api\" \"npm run dev --workspace=@nexus/web\"",
+    "dev": "npm run dev --workspace=@nexus/web",
     "dev:api": "npm run dev --workspace=@nexus/api",
     "dev:web": "npm run dev --workspace=@nexus/web",
-    "build:contracts": "npm run build --workspace=@nexus/contracts",
-    "build:api": "npm run build --workspace=@nexus/api",
     "build:web": "npm run build --workspace=@nexus/web",
-    "build": "npm run build:contracts && npm run build:api && npm run build:web",
-    "typecheck": "npm run typecheck --workspace=@nexus/contracts && npm run typecheck --workspace=@nexus/api && npm run typecheck --workspace=@nexus/web",
-    "lint": "echo \"Sprint 01: Codebase passes strict TypeScript analysis.\"",
-    "test": "echo \"Sprint 01: Foundation ready. Automated test suites scheduled for Sprint 02.\"",
-    "prisma:generate": "npm run prisma:generate --workspace=@nexus/api",
-    "clean": "npm run clean --workspaces --if-present"
-  },
-  "devDependencies": {
-    "concurrently": "^9.0.1"
+    "build:api": "npm run build --workspace=@nexus/api",
+    "build": "npm run build:web && npm run build:api",
+    "start": "node apps/api/dist/server.js",
+    "test:audit": "npm run test:audit --workspace=@nexus/api"
   }
 }

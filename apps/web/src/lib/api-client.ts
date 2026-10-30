@@ -1,4 +1,4 @@
-import type { ApiResponse, ApiErrorResponse } from "@nexus/contracts";
+import type { ApiResponse, ApiErrorResponse } from "../types/contracts";
 
 export class ApiClientError extends Error {
   public readonly code: string;

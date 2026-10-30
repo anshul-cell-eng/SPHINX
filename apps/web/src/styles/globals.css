@@ -4,42 +4,42 @@
 
 @layer base {
   :root {
-    /* Premium Enterprise Dark Charcoal/Navy Default */
-    --background: 222 47% 7%;        /* #090D16 */
-    --foreground: 210 40% 98%;       /* #F8FAFC */
-    
-    --card: 222 47% 10%;             /* #0E1422 */
-    --card-foreground: 210 40% 98%;
+    /* FREELANCEOS New Design System - Obsidian / Charcoal / Warm Ivory / Copper */
+    --background: 80 5% 7%;          /* #111210 Obsidian */
+    --foreground: 45 25% 93%;        /* #F2EFE7 Warm Ivory */
 
-    --popover: 222 47% 10%;
-    --popover-foreground: 210 40% 98%;
+    --card: 80 5% 10%;               /* #191A17 Deep Charcoal */
+    --card-foreground: 45 25% 93%;
 
-    --primary: 217 91% 60%;          /* Restrained Indigo/Blue #3B82F6 */
-    --primary-foreground: 210 40% 98%;
+    --popover: 80 5% 10%;
+    --popover-foreground: 45 25% 93%;
 
-    --secondary: 217 33% 17%;        /* Dark slate surface */
-    --secondary-foreground: 210 40% 98%;
+    --primary: 20 48% 49%;           /* #B86A43 Copper */
+    --primary-foreground: 45 25% 93%;
 
-    --muted: 217 33% 15%;
-    --muted-foreground: 215 20% 65%; /* #94A3B8 */
+    --secondary: 75 6% 13%;          /* #22231F Secondary Surface */
+    --secondary-foreground: 45 25% 93%;
 
-    --accent: 217 33% 20%;
-    --accent-foreground: 210 40% 98%;
+    --muted: 75 6% 13%;
+    --muted-foreground: 50 6% 62%;   /* #A5A397 Secondary Typography */
 
-    --destructive: 0 84% 60%;        /* #EF4444 */
-    --destructive-foreground: 210 40% 98%;
+    --accent: 75 6% 16%;             /* #2A2B26 Elevated Surface */
+    --accent-foreground: 45 25% 93%;
 
-    --success: 158 64% 52%;          /* #10B981 */
-    --success-foreground: 210 40% 98%;
+    --destructive: 4 52% 56%;        /* #C95A53 Restrained Muted Red */
+    --destructive-foreground: 45 25% 93%;
 
-    --warning: 38 92% 50%;          /* #F59E0B */
-    --warning-foreground: 210 40% 98%;
+    --success: 124 27% 42%;          /* #4E8752 Muted Emerald */
+    --success-foreground: 45 25% 93%;
 
-    --border: 217 33% 18%;           /* Clean subtle border */
-    --input: 217 33% 18%;
-    --ring: 217 91% 60%;
+    --warning: 30 75% 63%;           /* #E6A15C Warm Amber */
+    --warning-foreground: 80 5% 7%;
 
-    --radius: 0.5rem;
+    --border: 75 5% 18%;             /* #2E302B Subtle Hairline Border */
+    --input: 75 6% 13%;
+    --ring: 20 48% 49%;
+
+    --radius: 0.375rem;              /* 6px disciplined radius */
   }
 
   * {
@@ -47,26 +47,106 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    background-color: #111210;
+    color: #F2EFE7;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    antialiased: true;
+    selection-background-color: rgba(184, 106, 67, 0.25);
+    selection-color: #F2EFE7;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* Custom crisp dark scrollbar */
+/* Custom disciplined dark scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #111210;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
-  border-radius: 3px;
+  background: #2E302B;
+  border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: #3D3F38;
+}
+
+/* Shared Component Classes */
+@layer components {
+  /* Industrial Charcoal Card */
+  .panel-charcoal {
+    background-color: #191A17;
+    border: 1px solid #2E302B;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5), 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  }
+
+  .panel-surface {
+    background-color: #22231F;
+    border: 1px solid #2E302B;
+    border-radius: 6px;
+  }
+
+  /* Primary Copper Button */
+  .btn-copper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 6px;
+    background-color: #B86A43;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #F2EFE7;
+    border: 1px solid rgba(200, 124, 85, 0.3);
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-copper:hover {
+    background-color: #D97745;
+  }
+  .btn-copper:active {
+    transform: scale(0.99);
+  }
+
+  /* Secondary Charcoal Ghost Button */
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #2E302B;
+    background-color: #22231F;
+    padding: 0.5rem 1rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #F2EFE7;
+    transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn-secondary:hover {
+    background-color: #2A2B26;
+    border-color: #3D3F38;
+  }
+  .btn-secondary:active {
+    transform: scale(0.99);
+  }
+
+  /* Text hierarchy */
+  .text-primary-ivory {
+    color: #F2EFE7;
+  }
+
+  .text-secondary-ivory {
+    color: #A5A397;
+  }
+
+  .text-muted-ivory {
+    color: #77766D;
+  }
 }

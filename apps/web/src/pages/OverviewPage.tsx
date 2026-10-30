@@ -268,13 +268,13 @@ export function OverviewPage() {
                 <Database className="h-4 w-4 text-amber-400" />
                 <Badge
                   variant={
-                    healthData?.services?.database === "connected"
+                    (healthData?.services?.database as any) === "connected"
                       ? "success"
                       : "warning"
                   }
                   className="text-[10px] font-mono"
                 >
-                  {healthData?.services?.database === "connected"
+                  {(healthData?.services?.database as any) === "connected"
                     ? "Connected"
                     : "Standby (No DB URL)"}
                 </Badge>
@@ -294,13 +294,13 @@ export function OverviewPage() {
                 <ShieldCheck className="h-4 w-4 text-primary" />
                 <Badge
                   variant={
-                    healthData?.services?.supabase === "connected"
+                    (healthData?.services as any)?.supabase === "connected"
                       ? "success"
                       : "secondary"
                   }
                   className="text-[10px] font-mono"
                 >
-                  {healthData?.services?.supabase === "connected"
+                  {(healthData?.services as any)?.supabase === "connected"
                     ? "Connected"
                     : "Standby (No Supabase URL)"}
                 </Badge>

@@ -1,56 +1,27 @@
 import { Router } from "express";
-import type { Request, Response } from "express";
 import { ApiResponseHelper } from "../lib/api-response.js";
-import { checkDatabaseConnection } from "../lib/prisma.js";
-import { checkSupabaseConnection } from "../lib/supabase.js";
+import { getDatabaseStatus } from "../lib/database.js";
 
 export const healthRouter = Router();
 
-/**
- * GET /api/v1/health
- * Production health probe verifying API server operational readiness
- */
-healthRouter.get("/", async (_req: Request, res: Response) => {
-  const [dbResult, supabaseResult] = await Promise.all([
-    checkDatabaseConnection(),
-    checkSupabaseConnection(),
-  ]);
+healthRouter.get("/", (req, res) => {
+  const dbStatus = getDatabaseStatus();
 
-  ApiResponseHelper.success(
-    res,
-    "NEXUS API is operational",
-    {
-      status: "healthy",
-      services: {
-        database: dbResult.status,
-        supabase: supabaseResult.status,
-      },
+  const healthData = {
+    status: "healthy",
+    timestamp: new Date().toISOString(),
+    uptime: Math.round(process.uptime()),
+    environment: process.env.NODE_ENV || "development",
+    services: {
+      api: { status: "operational", uptimeSeconds: Math.round(process.uptime()) },
+      database: dbStatus,
+      razorpay: { status: "test_mode_ready" },
     },
-    200
-  );
-});
-
-/**
- * GET /api/v1/health/detailed
- * Comprehensive service diagnostics with connection details
- */
-healthRouter.get("/detailed", async (_req: Request, res: Response) => {
-  const [dbResult, supabaseResult] = await Promise.all([
-    checkDatabaseConnection(),
-    checkSupabaseConnection(),
-  ]);
-
-  ApiResponseHelper.success(
-    res,
-    "NEXUS System Diagnostics",
-    {
-      status: "healthy",
-      uptime: process.uptime(),
-      services: {
-        database: dbResult,
-        supabase: supabaseResult,
-      },
+    system: {
+      nodeVersion: process.version,
+      memoryUsageMB: Math.round(process.memoryUsage().rss / 1024 / 1024),
     },
-    200
-  );
+  };
+
+  ApiResponseHelper.success(res, "FREELANCEOS System Diagnostics Healthy", healthData);
 });

@@ -3,7 +3,7 @@ import type {
   ApiResponse,
   ApiErrorResponse,
   PaginationMeta,
-} from "@nexus/contracts";
+} from "../types/contracts.js";
 
 export class AppError extends Error {
   public readonly statusCode: number;
