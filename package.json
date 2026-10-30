@@ -15,5 +15,8 @@
     "build": "npm run build:web && npm run build:api",
     "start": "node apps/api/dist/server.js",
     "test:audit": "npm run test:audit --workspace=@nexus/api"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.67.2"
   }
 }
