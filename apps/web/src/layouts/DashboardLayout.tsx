@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink, Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { useFreelanceStore, freelanceStore } from "../lib/freelance-store";
 import {
   LayoutDashboard,
@@ -27,6 +28,7 @@ import {
 export function DashboardLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
   const state = useFreelanceStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
@@ -267,8 +269,9 @@ export function DashboardLayout() {
                 </Link>
                 <div className="border-t border-[#2E302B] my-1" />
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     setUserMenuOpen(false);
+                    await logout();
                     navigate("/auth/login");
                   }}
                   className="w-full text-left flex items-center gap-2 px-3 py-1.5 rounded text-xs text-[#C95A53] hover:bg-[#22231F] transition-colors"

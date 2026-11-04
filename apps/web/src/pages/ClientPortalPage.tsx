@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { useFreelanceStore, freelanceStore } from "../lib/freelance-store";
 import confetti from "canvas-confetti";
 import {
@@ -19,6 +20,8 @@ import {
 } from "lucide-react";
 
 export function ClientPortalPage() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
   const state = useFreelanceStore();
   const [activeClientId, setActiveClientId] = useState(
     state.activeClientId || state.clients[0]?.id || "cli-1"
@@ -86,7 +89,7 @@ export function ClientPortalPage() {
           </div>
         </div>
 
-        {/* Right Switcher back to Freelancer Mode */}
+        {/* Right Switcher & Logout */}
         <div className="flex items-center gap-3">
           <Link
             to="/app"
@@ -95,6 +98,16 @@ export function ClientPortalPage() {
             <User className="h-3.5 w-3.5" />
             <span>Freelancer Mode</span>
           </Link>
+          <button
+            type="button"
+            onClick={async () => {
+              await logout();
+              navigate("/auth/login");
+            }}
+            className="p-1.5 rounded border border-[#2E302B] bg-[#191A17] text-xs text-[#C95A53] hover:bg-[#22231F] transition-colors"
+          >
+            Sign Out
+          </button>
         </div>
       </header>
 

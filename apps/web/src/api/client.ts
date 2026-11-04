@@ -92,9 +92,11 @@ interface RequestOptions extends Omit<RequestInit, "body"> {
  * In-memory token storage for optimal security (XSS mitigation),
  * with localStorage fallback for persistence across tab reloads.
  */
-class TokenStorage {
+export class TokenStorage {
   private static ACCESS_TOKEN_KEY = "freelanceflow_access_token";
+  private static REFRESH_TOKEN_KEY = "freelanceflow_refresh_token";
   private static memoryToken: string | null = null;
+  private static memoryRefreshToken: string | null = null;
 
   public static getToken(): string | null {
     if (this.memoryToken) return this.memoryToken;
@@ -107,23 +109,51 @@ class TokenStorage {
     }
   }
 
-  public static setToken(token: string | null): void {
-    this.memoryToken = token;
+  public static getRefreshToken(): string | null {
+    if (this.memoryRefreshToken) return this.memoryRefreshToken;
     try {
-      if (token) {
-        localStorage.setItem(this.ACCESS_TOKEN_KEY, token);
-      } else {
-        localStorage.removeItem(this.ACCESS_TOKEN_KEY);
-      }
+      const stored = localStorage.getItem(this.REFRESH_TOKEN_KEY);
+      this.memoryRefreshToken = stored;
+      return stored;
     } catch {
-      // Safe fallback if local storage is restricted
+      return null;
     }
+  }
+
+  public static setTokens(tokens: { accessToken?: string | null; refreshToken?: string | null }): void {
+    if (tokens.accessToken !== undefined) {
+      this.memoryToken = tokens.accessToken;
+      try {
+        if (tokens.accessToken) {
+          localStorage.setItem(this.ACCESS_TOKEN_KEY, tokens.accessToken);
+        } else {
+          localStorage.removeItem(this.ACCESS_TOKEN_KEY);
+        }
+      } catch {}
+    }
+
+    if (tokens.refreshToken !== undefined) {
+      this.memoryRefreshToken = tokens.refreshToken;
+      try {
+        if (tokens.refreshToken) {
+          localStorage.setItem(this.REFRESH_TOKEN_KEY, tokens.refreshToken);
+        } else {
+          localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+        }
+      } catch {}
+    }
+  }
+
+  public static setToken(token: string | null): void {
+    this.setTokens({ accessToken: token });
   }
 
   public static clear(): void {
     this.memoryToken = null;
+    this.memoryRefreshToken = null;
     try {
       localStorage.removeItem(this.ACCESS_TOKEN_KEY);
+      localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     } catch {
       // Ignore errors
     }
@@ -139,12 +169,24 @@ class HttpClient {
   private refreshSubscribers: Array<(token: string) => void> = [];
 
   constructor() {
-    const envUrl =
+    let resolvedUrl =
       (import.meta.env.VITE_API_URL as string | undefined) ||
-      (import.meta.env.NEXT_PUBLIC_API_URL as string | undefined) ||
-      "http://localhost:5000/api/v1";
+      (import.meta.env.NEXT_PUBLIC_API_URL as string | undefined);
 
-    this.baseUrl = envUrl.endsWith("/") ? envUrl.slice(0, -1) : envUrl;
+    if (!resolvedUrl) {
+      if (typeof window !== "undefined") {
+        const isLocal =
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1";
+        resolvedUrl = isLocal
+          ? "http://localhost:4000/api/v1"
+          : `${window.location.origin}/api/v1`;
+      } else {
+        resolvedUrl = "http://localhost:4000/api/v1";
+      }
+    }
+
+    this.baseUrl = resolvedUrl.endsWith("/") ? resolvedUrl.slice(0, -1) : resolvedUrl;
   }
 
   public setBaseUrl(url: string): void {
@@ -165,10 +207,11 @@ class HttpClient {
   }
 
   /**
-   * Executes a refresh token exchange via httpOnly cookie
+   * Executes a refresh token exchange via POST body and httpOnly cookie
    */
   private async refreshAccessToken(): Promise<string> {
     const refreshUrl = `${this.baseUrl}/auth/refresh`;
+    const refreshToken = TokenStorage.getRefreshToken();
 
     const response = await fetch(refreshUrl, {
       method: "POST",
@@ -176,7 +219,8 @@ class HttpClient {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-      credentials: "include", // Required for httpOnly refresh cookie
+      credentials: "include",
+      body: JSON.stringify({ refreshToken }),
     });
 
     if (!response.ok) {
@@ -184,9 +228,16 @@ class HttpClient {
       throw new ApiError("Session expired. Please log in again.", response.status, "AUTH_REFRESH_FAILED");
     }
 
-    const payload = (await response.json()) as ApiResponse<{ accessToken: string }>;
-    const newToken = payload.data.accessToken;
-    TokenStorage.setToken(newToken);
+    const payload = (await response.json()) as ApiResponse<any>;
+    const newToken =
+      payload.data?.accessToken || payload.data?.tokens?.accessToken;
+    const newRefreshToken =
+      payload.data?.refreshToken || payload.data?.tokens?.refreshToken;
+
+    TokenStorage.setTokens({
+      accessToken: newToken,
+      refreshToken: newRefreshToken,
+    });
     return newToken;
   }
 
@@ -341,5 +392,4 @@ class HttpClient {
 }
 
 export const apiClient = new HttpClient();
-export { TokenStorage };
 export default apiClient;

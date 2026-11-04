@@ -63,9 +63,21 @@ export function createApp(): express.Application {
     })
   );
 
-  // 4. Request Body Parsers
+  // 4. Request Body Parsers & Cookie Extraction
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+  app.use((req, _res, next) => {
+    const cookieHeader = req.headers.cookie;
+    const cookies: Record<string, string> = {};
+    if (cookieHeader) {
+      cookieHeader.split(";").forEach((pair) => {
+        const [key, ...vals] = pair.trim().split("=");
+        if (key) cookies[key] = decodeURIComponent(vals.join("="));
+      });
+    }
+    (req as any).cookies = cookies;
+    next();
+  });
 
   // 5. Rate Limiting for API routes
   app.use("/api/", apiRateLimiter);

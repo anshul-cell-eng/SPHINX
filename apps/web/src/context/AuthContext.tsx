@@ -84,14 +84,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (credentials: { email: string; password: string; role?: string }) => {
     setIsLoading(true);
     try {
-      const res = await apiClient.post<{ accessToken: string; user: AuthUser }>(
+      const res = await apiClient.post<any>(
         "/auth/login",
         credentials,
         { skipAuth: true }
       );
 
-      const { accessToken: newToken, user: authUser } = res.data;
-      TokenStorage.setToken(newToken);
+      const payload = res.data;
+      const newToken = payload.tokens?.accessToken || payload.accessToken;
+      const newRefreshToken = payload.tokens?.refreshToken || payload.refreshToken;
+      const authUser = payload.user;
+
+      TokenStorage.setTokens({ accessToken: newToken, refreshToken: newRefreshToken });
       setAccessToken(newToken);
       setUser(authUser);
       return authUser;
@@ -103,17 +107,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   /**
    * Registers a new user via POST /auth/register
    */
-  const register = async (payload: { email: string; password: string; name?: string; role?: string }) => {
+  const register = async (payloadData: { email: string; password: string; name?: string; role?: string }) => {
     setIsLoading(true);
     try {
-      const res = await apiClient.post<{ accessToken: string; user: AuthUser }>(
+      const res = await apiClient.post<any>(
         "/auth/register",
-        payload,
+        payloadData,
         { skipAuth: true }
       );
 
-      const { accessToken: newToken, user: authUser } = res.data;
-      TokenStorage.setToken(newToken);
+      const payload = res.data;
+      const newToken = payload.tokens?.accessToken || payload.accessToken;
+      const newRefreshToken = payload.tokens?.refreshToken || payload.refreshToken;
+      const authUser = payload.user;
+
+      TokenStorage.setTokens({ accessToken: newToken, refreshToken: newRefreshToken });
       setAccessToken(newToken);
       setUser(authUser);
       return authUser;

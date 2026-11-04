@@ -1,6 +1,10 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "./context/AuthContext";
+import {
+  AuthProvider,
+  ProtectedFreelancerRoute,
+  ProtectedClientRoute,
+} from "./context/AuthContext";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { DashboardLayout } from "./layouts/DashboardLayout";
@@ -39,11 +43,32 @@ export function App() {
             <Route path="/login" element={<Navigate to="/auth/login" replace />} />
 
             {/* Client Portal Mode */}
-            <Route path="/portal/*" element={<ClientPortalPage />} />
-            <Route path="/portal" element={<ClientPortalPage />} />
+            <Route
+              path="/portal/*"
+              element={
+                <ProtectedClientRoute>
+                  <ClientPortalPage />
+                </ProtectedClientRoute>
+              }
+            />
+            <Route
+              path="/portal"
+              element={
+                <ProtectedClientRoute>
+                  <ClientPortalPage />
+                </ProtectedClientRoute>
+              }
+            />
 
             {/* Freelancer SaaS Dashboard */}
-            <Route path="/app" element={<DashboardLayout />}>
+            <Route
+              path="/app"
+              element={
+                <ProtectedFreelancerRoute>
+                  <DashboardLayout />
+                </ProtectedFreelancerRoute>
+              }
+            >
               <Route index element={<DashboardOverview />} />
               <Route path="clients" element={<ClientsPage />} />
               <Route path="projects" element={<ProjectsPage />} />

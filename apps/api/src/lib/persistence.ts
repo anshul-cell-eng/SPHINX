@@ -103,7 +103,79 @@ export async function initDatabaseSync(): Promise<void> {
       memoryStore.payments = payments as any;
       memoryStore.timeEntries = timeEntries as any;
 
-      console.log(`✅ Loaded ${users.length} users, ${clients.length} clients, ${projects.length} projects, ${invoices.length} invoices from MongoDB.`);
+      // Safe, idempotent check for essential demo sandbox accounts
+      const baselineUsers = [
+        {
+          id: "usr-freelancer-1",
+          email: "alex@freelanceos.dev",
+          passwordHash: "$2a$10$o8.jQ1.8/f/B2R0yO7r4yecVf.4N7bQcZ2gqXf7Ww3hD1nUe6r2gG",
+          name: "Alex Morgan",
+          role: "FREELANCER",
+          company: "Apex Design Systems",
+          avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250",
+          hourlyRate: 4500,
+          taxId: "27AADCA1234F1Z8",
+          upiId: "alex.apex@okhdfcbank",
+          workspaceId: "ws-alex",
+          createdAt: "2026-08-01",
+        },
+        {
+          id: "usr-freelancer-alias",
+          email: "alex@freelanceos.studio",
+          passwordHash: "$2a$10$o8.jQ1.8/f/B2R0yO7r4yecVf.4N7bQcZ2gqXf7Ww3hD1nUe6r2gG",
+          name: "Alex Morgan",
+          role: "FREELANCER",
+          company: "Apex Design Systems",
+          avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250",
+          hourlyRate: 4500,
+          taxId: "27AADCA1234F1Z8",
+          upiId: "alex.apex@okhdfcbank",
+          workspaceId: "ws-alex",
+          createdAt: "2026-08-01",
+        },
+        {
+          id: "usr-client-1",
+          email: "sarah@zenithfintech.com",
+          passwordHash: "$2a$10$o8.jQ1.8/f/B2R0yO7r4yecVf.4N7bQcZ2gqXf7Ww3hD1nUe6r2gG",
+          name: "Sarah Chen",
+          role: "CLIENT",
+          company: "Zenith FinTech",
+          avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
+          hourlyRate: 0,
+          taxId: "GSTIN27AABCT1234",
+          upiId: "sarah.zenith@icici",
+          workspaceId: "ws-alex",
+          createdAt: "2026-08-15",
+        },
+        {
+          id: "usr-client-alias",
+          email: "sarah@novastudios.design",
+          passwordHash: "$2a$10$o8.jQ1.8/f/B2R0yO7r4yecVf.4N7bQcZ2gqXf7Ww3hD1nUe6r2gG",
+          name: "Sarah Chen",
+          role: "CLIENT",
+          company: "Nova Studios Inc",
+          avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150",
+          hourlyRate: 0,
+          taxId: "GSTIN27AABCT1234",
+          upiId: "sarah.nova@icici",
+          workspaceId: "ws-alex",
+          createdAt: "2026-08-15",
+        },
+      ];
+
+      for (const bUser of baselineUsers) {
+        const found = memoryStore.users.find((u) => u.email.toLowerCase() === bUser.email.toLowerCase());
+        if (!found) {
+          const dbExists = await UserModel.findOne({ email: bUser.email.toLowerCase() });
+          if (!dbExists) {
+            await UserModel.create(bUser);
+            console.log(`🌱 Idempotently seeded sandbox user: ${bUser.email}`);
+          }
+          memoryStore.users.push(bUser as any);
+        }
+      }
+
+      console.log(`✅ Loaded ${memoryStore.users.length} users, ${clients.length} clients, ${projects.length} projects, ${invoices.length} invoices from MongoDB.`);
     }
   } catch (error) {
     console.error("⚠️ Error synchronizing with MongoDB:", error);

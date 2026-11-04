@@ -1,37 +1,67 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { freelanceStore } from "../lib/freelance-store";
-import { ArrowRight, Lock, Mail, User, Globe, ShieldCheck } from "lucide-react";
+import { ArrowRight, Lock, Mail, User, Globe, ShieldCheck, AlertCircle } from "lucide-react";
 
 export function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [role, setRole] = useState<"FREELANCER" | "CLIENT">("FREELANCER");
-  const [email, setEmail] = useState("alex@freelanceos.studio");
-  const [password, setPassword] = useState("••••••••••••");
+  const [email, setEmail] = useState("alex@freelanceos.dev");
+  const [password, setPassword] = useState("FreelanceOS@2026");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const executeAuth = async (
+    targetEmail: string,
+    targetPass: string,
+    targetRole: "FREELANCER" | "CLIENT"
+  ) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const authUser = await login({
+        email: targetEmail.trim(),
+        password: targetPass,
+      });
+
+      const userRole = authUser.role ? authUser.role.toUpperCase() : targetRole;
+      if (userRole === "CLIENT") {
+        freelanceStore.setRole("CLIENT", "cli-1");
+        navigate("/portal", { replace: true });
+      } else {
+        freelanceStore.setRole("FREELANCER");
+        navigate("/app", { replace: true });
+      }
+    } catch (err: any) {
+      console.error("Authentication failure:", err);
+      const message =
+        err?.message ||
+        err?.details?.message ||
+        "Invalid email or password. Please verify your credentials.";
+      setError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      if (role === "FREELANCER") {
-        freelanceStore.setRole("FREELANCER");
-        navigate("/app");
-      } else {
-        freelanceStore.setRole("CLIENT", "cli-1");
-        navigate("/portal");
-      }
-    }, 400);
+    executeAuth(email, password, role);
   };
 
   const handleQuickLogin = (selectedRole: "FREELANCER" | "CLIENT") => {
     if (selectedRole === "FREELANCER") {
-      freelanceStore.setRole("FREELANCER");
-      navigate("/app");
+      setRole("FREELANCER");
+      setEmail("alex@freelanceos.dev");
+      setPassword("FreelanceOS@2026");
+      executeAuth("alex@freelanceos.dev", "FreelanceOS@2026", "FREELANCER");
     } else {
-      freelanceStore.setRole("CLIENT", "cli-1");
-      navigate("/portal");
+      setRole("CLIENT");
+      setEmail("sarah@zenithfintech.com");
+      setPassword("ClientPortal@2026");
+      executeAuth("sarah@zenithfintech.com", "ClientPortal@2026", "CLIENT");
     }
   };
 
@@ -61,7 +91,9 @@ export function LoginPage() {
             type="button"
             onClick={() => {
               setRole("FREELANCER");
-              setEmail("alex@freelanceos.studio");
+              setEmail("alex@freelanceos.dev");
+              setPassword("FreelanceOS@2026");
+              setError(null);
             }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-medium transition-all ${
               role === "FREELANCER"
@@ -76,7 +108,9 @@ export function LoginPage() {
             type="button"
             onClick={() => {
               setRole("CLIENT");
-              setEmail("sarah@novastudios.design");
+              setEmail("sarah@zenithfintech.com");
+              setPassword("ClientPortal@2026");
+              setError(null);
             }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded text-xs font-medium transition-all ${
               role === "CLIENT"
@@ -100,16 +134,18 @@ export function LoginPage() {
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
+                disabled={loading}
                 onClick={() => handleQuickLogin("FREELANCER")}
-                className="p-2 rounded border border-[#2E302B] bg-[#22231F] hover:border-[#3D3F38] text-[#F2EFE7] text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                className="p-2 rounded border border-[#2E302B] bg-[#22231F] hover:border-[#3D3F38] text-[#F2EFE7] text-xs font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-[#B86A43]" />
                 <span>Alex (Freelancer)</span>
               </button>
               <button
                 type="button"
+                disabled={loading}
                 onClick={() => handleQuickLogin("CLIENT")}
-                className="p-2 rounded border border-[#2E302B] bg-[#22231F] hover:border-[#3D3F38] text-[#F2EFE7] text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                className="p-2 rounded border border-[#2E302B] bg-[#22231F] hover:border-[#3D3F38] text-[#F2EFE7] text-xs font-medium flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-[#4E8752]" />
                 <span>Sarah (Client)</span>
@@ -118,6 +154,13 @@ export function LoginPage() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
+            {error && (
+              <div className="rounded border border-[#B84343]/40 bg-[#2A1717] px-3 py-2 text-xs text-[#E07A7A] flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0 text-[#E07A7A]" />
+                <span>{error}</span>
+              </div>
+            )}
+
             <div>
               <label className="block text-xs font-medium text-[#A5A397] mb-1.5">
                 Work Email Address
@@ -128,7 +171,10 @@ export function LoginPage() {
                   type="email"
                   required
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError(null);
+                  }}
                   className="w-full rounded border border-[#2E302B] bg-[#22231F] py-2 pl-9 pr-3 text-xs sm:text-sm text-[#F2EFE7] placeholder-[#77766D] focus:border-[#B86A43] focus:outline-none focus:ring-1 focus:ring-[#B86A43]"
                 />
               </div>
@@ -149,7 +195,10 @@ export function LoginPage() {
                   type="password"
                   required
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError(null);
+                  }}
                   className="w-full rounded border border-[#2E302B] bg-[#22231F] py-2 pl-9 pr-3 text-xs sm:text-sm text-[#F2EFE7] placeholder-[#77766D] focus:border-[#B86A43] focus:outline-none focus:ring-1 focus:ring-[#B86A43]"
                 />
               </div>
@@ -159,7 +208,7 @@ export function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded bg-[#B86A43] hover:bg-[#D97745] py-2.5 text-xs sm:text-sm font-medium text-[#F2EFE7] border border-[#C87C55]/30 shadow-subtle transition-colors"
+                className="w-full inline-flex items-center justify-center gap-2 rounded bg-[#B86A43] hover:bg-[#D97745] py-2.5 text-xs sm:text-sm font-medium text-[#F2EFE7] border border-[#C87C55]/30 shadow-subtle transition-colors disabled:opacity-50"
               >
                 <span>{loading ? "Verifying..." : `Authenticate as ${role === "FREELANCER" ? "Freelancer" : "Client"}`}</span>
                 <ArrowRight className="h-3.5 w-3.5" />
